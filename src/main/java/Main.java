@@ -33,7 +33,7 @@ public class Main {
 
             //register the server channel with selector with interest in accepting events
             serverChannel.register(selector, SelectionKey.OP_ACCEPT);
-            System.out.println("Event Loop Redis Server started on port 6379...");
+//            System.out.println("Event Loop Redis Server started on port 6379...");
             //now check for events for our server
             while (true){
                 selector.select();
@@ -56,7 +56,7 @@ public class Main {
                         if (client != null) {
                             client.configureBlocking(false);
                             client.register(selector, SelectionKey.OP_READ);
-                            System.out.println("Accepted connection from: " + client.getRemoteAddress());
+//                            System.out.println("Accepted connection from: " + client.getRemoteAddress());
                         }
 
                     }else if(key.isReadable()){ //existing client
@@ -65,9 +65,9 @@ public class Main {
                         ByteBuffer buffer = ByteBuffer.allocate(1024);
 
                         int byteRead = client.read(buffer);
-                        System.out.println("Loop fired! byteRead = " + byteRead);
+//                        System.out.println("Loop fired! byteRead = " + byteRead);
                         if(byteRead==-1){
-                            System.out.println("Client disconnected.");
+//                            System.out.println("Client disconnected.");
                             client.close();
                             continue;
                         }
