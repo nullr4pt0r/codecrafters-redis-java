@@ -1,5 +1,6 @@
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 
@@ -20,12 +21,15 @@ public class Main {
             // Wait for connection from client.
             clientSocket = serverSocket.accept();
             //response PONG to multiple connections
-
+            OutputStream outputStream = clientSocket.getOutputStream();
             InputStream inputStream = clientSocket.getInputStream();
-            int bytesRead = inputStream.read(new byte[1024]);
-            while (bytesRead != -1) {
-                clientSocket.getOutputStream().write("+PONG\r\n".getBytes());
+            int bytesRead;
+            while ((bytesRead = inputStream.read(new byte[1024])) != -1) {
+                outputStream.write("+PONG\r\n".getBytes());
+                outputStream.flush();
             }
+
+
 
         } catch (IOException e) {
             System.out.println("IOException: " + e.getMessage());
