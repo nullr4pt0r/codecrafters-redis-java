@@ -69,7 +69,7 @@ public class Main {
 
                         if(byteRead > 0){
                             String request = new String(buffer.array(), buffer.position(), buffer.remaining(), StandardCharsets.UTF_8);
-                            System.out.println(request);
+//                            System.out.println(request);
 
                             client.write(handlePayload(request));
                         }
@@ -91,7 +91,7 @@ public class Main {
 
         String[] payloads = request.replace("\\r\\n","\n").split("\n");
 
-        System.out.println(Arrays.toString(payloads));
+//        System.out.println(Arrays.toString(payloads));
 
         //check them for command
         List<String> commands = new ArrayList<>();
