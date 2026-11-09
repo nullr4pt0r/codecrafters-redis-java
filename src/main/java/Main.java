@@ -1,17 +1,11 @@
-import java.io.BufferedWriter;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.net.InetSocketAddress;
-import java.net.ServerSocket;
-import java.net.Socket;
 import java.nio.ByteBuffer;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
-import java.util.Iterator;
-import java.util.Set;
+import java.nio.charset.StandardCharsets;
+import java.util.*;
 
 public class Main {
     public static void main(String[] args) {
@@ -71,8 +65,15 @@ public class Main {
                             client.close();
                             continue;
                         }
+                        buffer.flip();
 
-                        client.write(ByteBuffer.wrap("+PONG\r\n".getBytes()));
+                        if(byteRead > 0){
+                            String request = new String(buffer.array(), buffer.position(), buffer.remaining(), StandardCharsets.UTF_8);
+                            System.out.println(request);
+
+                            client.write(handlePayload(request));
+                        }
+
 
                     }
                 }
@@ -83,6 +84,59 @@ public class Main {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public static ByteBuffer handlePayload(String request){
+        //split it as array of payloads
+
+        String[] payloads = request.replace("\\r\\n","\n").split("\n");
+
+        System.out.println(Arrays.toString(payloads));
+
+        //check them for command
+        List<String> commands = new ArrayList<>();
+        for(String payload:payloads){
+            if(payload.isEmpty()){
+                continue;
+            }
+
+            if(payload.startsWith("*") || payload.startsWith("$")){
+                continue;
+            }
+
+            commands.add(payload);
+        }
+
+
+        if(commands.isEmpty()){
+            return getPong();
+        }
+
+        for(int index = 0; index < commands.size(); index++){
+            String command = commands.get(index);
+            if("PING".equalsIgnoreCase(command)){
+                return getPong();
+            }
+            else if("ECHO".equalsIgnoreCase(command)){
+                //take next argument
+                String arg = commands.get(index+1);
+                return buildRESPString(arg);
+            }
+        }
+        return getPong();
+    }
+
+    public static ByteBuffer getPong(){
+      return  ByteBuffer.wrap("+PONG\r\n".getBytes());
+    }
+
+    public static ByteBuffer buildRESPString(String arg){
+        String respDelimiter = "\\r\\n";
+        int length = arg.length();
+        if(length <= 0){
+            return null;
+        }
+       return ByteBuffer.wrap(("$"+length+respDelimiter+arg+respDelimiter).getBytes());
     }
 
 
