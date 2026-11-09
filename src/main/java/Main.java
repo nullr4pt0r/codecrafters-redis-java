@@ -89,7 +89,7 @@ public class Main {
     public static ByteBuffer handlePayload(String request){
         //split it as array of payloads
 
-        String[] payloads = request.replace("\\r\\n","\n").split("\n");
+        String[] payloads = request.replace("\r\n","\n").split("\n");
 
 //        System.out.println(Arrays.toString(payloads));
 
@@ -131,7 +131,7 @@ public class Main {
     }
 
     public static ByteBuffer buildRESPString(String arg){
-        String respDelimiter = "\\r\\n";
+        String respDelimiter = "\r\n";
         int length = arg.length();
         if(length <= 0){
             return null;
