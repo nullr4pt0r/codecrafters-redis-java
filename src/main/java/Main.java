@@ -128,6 +128,13 @@ public class Main {
                 //store the value and return OK
                 String key = commands.get(index+1);
                 String value = commands.get(index+2);
+
+                if (commands.size() > index + 4) {
+                    String optionalArg = commands.get(index + 3);
+                    String time = commands.get(index + 4);
+                    return storeKeyValue(key + ":" + value+":"+optionalArg+":"+time);
+                }
+
                 return storeKeyValue(key + ":" + value);
             }else if("GET".equalsIgnoreCase(command)){
                 String key = commands.get(index+1);
@@ -145,7 +152,7 @@ public class Main {
         String respDelimiter = "\r\n";
         int length = arg.length();
         if(length <= 0){
-            return null;
+            return buildNullBulkString();
         }
        return ByteBuffer.wrap(("$"+length+respDelimiter+arg+respDelimiter).getBytes());
     }
@@ -153,6 +160,11 @@ public class Main {
     public static ByteBuffer buildSimpleString(String arg){
         String respDelimiter = "\r\n";
         return ByteBuffer.wrap(("+"+arg+respDelimiter).getBytes());
+    }
+
+    public static ByteBuffer buildNullBulkString(){
+        String respDelimiter = "\r\n";
+        return ByteBuffer.wrap(("$-1"+respDelimiter).getBytes());
     }
 
     public static ByteBuffer storeKeyValue(String arg){
