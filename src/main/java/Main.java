@@ -6,6 +6,7 @@ import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class Main {
     public static void main(String[] args) {
@@ -27,6 +28,8 @@ public class Main {
 
             //register the server channel with selector with interest in accepting events
             serverChannel.register(selector, SelectionKey.OP_ACCEPT);
+
+
 //            System.out.println("Event Loop Redis Server started on port 6379...");
             //now check for events for our server
             while (true){
@@ -121,6 +124,14 @@ public class Main {
                 //take next argument
                 String arg = commands.get(index+1);
                 return buildRESPString(arg);
+            }else if("SET".equalsIgnoreCase(command)){
+                //store the value and return OK
+                String key = commands.get(index+1);
+                String value = commands.get(index+2);
+                return storeKeyValue(key + ":" + value);
+            }else if("GET".equalsIgnoreCase(command)){
+                String key = commands.get(index+1);
+                return retrieveKey(key);
             }
         }
         return getPong();
@@ -139,5 +150,16 @@ public class Main {
        return ByteBuffer.wrap(("$"+length+respDelimiter+arg+respDelimiter).getBytes());
     }
 
+    public static ByteBuffer buildSimpleString(String arg){
+        String respDelimiter = "\r\n";
+        return ByteBuffer.wrap(("+"+arg+respDelimiter).getBytes());
+    }
 
+    public static ByteBuffer storeKeyValue(String arg){
+       return buildSimpleString(StoreRetrievePayload.storePayload(arg));
+    }
+
+    public static ByteBuffer retrieveKey(String key){
+        return buildRESPString(StoreRetrievePayload.retrievePayloadByKey(key));
+    }
 }
